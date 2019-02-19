@@ -3,7 +3,7 @@ const keys = require("./keys.js");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const moment = require("moment");
-var spotify = require("node-spotify-api");
+var Spotify = require("node-spotify-api");
 const inquirer = require('inquirer');
 const fs = require("fs");
 
@@ -71,18 +71,18 @@ function movieRequest() {
   ]).then(function (movieResponse) {
     axios.get("http://www.omdbapi.com/?t=" + movieResponse.movieInput + "&y=&plot=short&apikey=trilogy")
       .then(function (response) {
-        // console.log("The movie's rating is: " + response.data.imdbRating);
-        console.log("Here's info on " + response.data.Title + " ------------------>>>")
-        // console.log('/n' + response.data.title);
+        console.log(">>>>-----------------------------------------------------------------------------------------------------------------");
+        console.log("Here's info on " + response.data.Title)
         console.log("Released: " + response.data.Released);
-        console.log("It's rated: " + response.data.imdbRating);
-        // console.log("Rotten Tomatoes gave it a score of: " + response.data.Ratings[1].Source.Value);
+        console.log("IMDB gave it a score of: " + response.data.imdbRating);
+        console.log("Rotten Tomatoes gave it a score of: " + response.data.Ratings[1].Value);
         console.log("Produced in:  " + response.data.Country);
         console.log("Language:  " + response.data.Language);
         console.log("Actors:  " + response.data.Actors);
-        console.log("Plot: ------------------------------------------------------------------------------");
+        console.log("Plot > > > > > > > > > > > > > > > > > > > > >");
         console.log(response.data.Plot);
-        console.log(">>>>--------------------------------------------------------------------------------");
+        console.log(">>>>-----------------------------------------------------------------------------------------------------------------");
+
         setTimeout(function () {
           doneFunction();
         }, 1000);
@@ -100,13 +100,13 @@ function bandsInTown() {
   ]).then(function (bandResponse) {
     axios.get("https://rest.bandsintown.com/artists/" + bandResponse.artist + "/events?app_id=codingbootcamp")
       .then(function (bandResponse) {
-        console.log(">>>>--------------------------------------------------------------------------------");
+        console.log(">>>>-----------------------------------------------------------------------------------------------------------------");
         console.log(bandResponse.data[1].lineup[0] + "'s next concert is at: " + bandResponse.data[1].venue.name);
         console.log("in: " + bandResponse.data[1].venue.city + ", " + bandResponse.data[1].venue.region);
         console.log("on: " + moment(bandResponse.data[1].datetime).format('dddd, MMMM Do YYYY')
           + " at " + moment(bandResponse.data[1].datetime).format('h:mm a'));
         console.log("You should go!")
-        console.log(">>>>--------------------------------------------------------------------------------");
+        console.log(">>>>-----------------------------------------------------------------------------------------------------------------");
         setTimeout(function () {
           doneFunction();
         }, 1000);
@@ -122,16 +122,20 @@ function spotifySearch() {
       name: "spotSong",
     }
   ]).then(function (spotifyResponse) {
-    spotify = spotify(keys.spotify);
-    spotify.search({ type: "track", query: spotifyResponse.spotSong },
-      function (err, data) {
-        if (err) {
-          console.log(err)
+    var spotify = new Spotify(keys.spotify);
+    spotify
+      .search({ type: 'track', query: spotifyResponse.spotSong, limit: 10 })
+      .then(function (response) {
+        console.log(">>>>-----------------------------------------------------------------------------------------------------------------")
+        for (i = 0; i < response.tracks.items.length; i++) {
+          console.log('"' + response.tracks.items[i].name + '" by: ' + response.tracks.items[i].artists[0].name);
+          console.log("It was released on the album " + '"' + response.tracks.items[i].album.name + '"');
+          console.log("Check it out here: " + response.tracks.items[i].external_urls.spotify);
+          console.log(">>>>-----------------------------------------------------------------------------------------------------------------")
         }
-        // console.log(data[1]);
-        setTimeout(function () {
-          doneFunction();
-        }, 1000);
       })
+      .catch(function (err) {
+        console.log(err);
+      });
   })
-  }
+}
