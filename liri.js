@@ -3,12 +3,11 @@ const keys = require("./keys.js");
 const axios = require("axios");
 const dotenv = require("dotenv");
 const moment = require("moment");
-const spotify = require("node-spotify-api");
+var spotify = require("node-spotify-api");
 const inquirer = require('inquirer');
 const fs = require("fs");
 
 
-// spotify = new Spotify(keys.spotify);
 
 function mainFunction() {
   inquirer
@@ -28,8 +27,7 @@ function mainFunction() {
         bandsInTown();
       }
       else if (choice === "Spotify") {
-        console.log("Choice is Spotify")
-        doneFunction();
+        spotifySearch();
       }
       else if (choice === "Movies") {
         movieRequest();
@@ -52,8 +50,7 @@ function doneFunction() {
         name: "confirm",
         default: true
       }
-    ])
-    .then(function (doneResponse) {
+    ]).then(function (doneResponse) {
       if (doneResponse.confirm) {
         // console.log("true")
         mainFunction(); //Calls initial Inquirer questions again
@@ -71,27 +68,26 @@ function movieRequest() {
       message: "What movie would you like to search?",
       name: "movieInput",
     }
-  ])
-    .then(function (movieResponse) {
-      axios.get("http://www.omdbapi.com/?t=" + movieResponse.movieInput + "&y=&plot=short&apikey=trilogy")
-        .then(function (response) {
-          // console.log("The movie's rating is: " + response.data.imdbRating);
-          console.log("Here's info on " + response.data.Title + " ------------------>>>")
-          // console.log('/n' + response.data.title);
-          console.log("Released: " + response.data.Released);
-          console.log("It's rated: " + response.data.imdbRating);
-          // console.log("Rotten Tomatoes gave it a score of: " + response.data.Ratings[1].Source.Value);
-          console.log("Produced in:  " + response.data.Country);
-          console.log("Language:  " + response.data.Language);
-          console.log("Actors:  " + response.data.Actors);
-          console.log("Plot: ------------------------------------------------------------------------------");
-          console.log(response.data.Plot);
-          console.log(">>>>--------------------------------------------------------------------------------");
-          setTimeout(function () {
-            doneFunction();
-          }, 1000);
-        });
-    });
+  ]).then(function (movieResponse) {
+    axios.get("http://www.omdbapi.com/?t=" + movieResponse.movieInput + "&y=&plot=short&apikey=trilogy")
+      .then(function (response) {
+        // console.log("The movie's rating is: " + response.data.imdbRating);
+        console.log("Here's info on " + response.data.Title + " ------------------>>>")
+        // console.log('/n' + response.data.title);
+        console.log("Released: " + response.data.Released);
+        console.log("It's rated: " + response.data.imdbRating);
+        // console.log("Rotten Tomatoes gave it a score of: " + response.data.Ratings[1].Source.Value);
+        console.log("Produced in:  " + response.data.Country);
+        console.log("Language:  " + response.data.Language);
+        console.log("Actors:  " + response.data.Actors);
+        console.log("Plot: ------------------------------------------------------------------------------");
+        console.log(response.data.Plot);
+        console.log(">>>>--------------------------------------------------------------------------------");
+        setTimeout(function () {
+          doneFunction();
+        }, 1000);
+      });
+  });
 }
 
 function bandsInTown() {
@@ -101,20 +97,41 @@ function bandsInTown() {
       message: "What band or artist would you like to see?",
       name: "artist",
     }
-  ])
-    .then(function (bandResponse) {
-      axios.get("https://rest.bandsintown.com/artists/" + bandResponse.artist + "/events?app_id=codingbootcamp")
-        .then(function (bandResponse) {
-          console.log(">>>>--------------------------------------------------------------------------------");
-          console.log(bandResponse.data[1].lineup[0] + "'s next concert is at: " + bandResponse.data[1].venue.name);
-          console.log("in: " + bandResponse.data[1].venue.city + ", " + bandResponse.data[1].venue.region);
-          console.log("on: " + moment(bandResponse.data[1].datetime).format('dddd, MMMM Do YYYY')
-            + " at " + moment(bandResponse.data[1].datetime).format('h:mm a'));
-          console.log("You should go!")
-          console.log(">>>>--------------------------------------------------------------------------------");
-          setTimeout(function () {
-            doneFunction();
-          }, 1000);
-        })
-    })
-}
+  ]).then(function (bandResponse) {
+    axios.get("https://rest.bandsintown.com/artists/" + bandResponse.artist + "/events?app_id=codingbootcamp")
+      .then(function (bandResponse) {
+        console.log(">>>>--------------------------------------------------------------------------------");
+        console.log(bandResponse.data[1].lineup[0] + "'s next concert is at: " + bandResponse.data[1].venue.name);
+        console.log("in: " + bandResponse.data[1].venue.city + ", " + bandResponse.data[1].venue.region);
+        console.log("on: " + moment(bandResponse.data[1].datetime).format('dddd, MMMM Do YYYY')
+          + " at " + moment(bandResponse.data[1].datetime).format('h:mm a'));
+        console.log("You should go!")
+        console.log(">>>>--------------------------------------------------------------------------------");
+        setTimeout(function () {
+          doneFunction();
+        }, 1000);
+      });
+  });
+};
+
+function spotifySearch() {
+  inquirer.prompt([
+    {
+      type: "input",
+      message: "What song would you like to check on Spotify?",
+      name: "spotSong",
+    }
+  ]).then(function (spotifyResponse) {
+    spotify = spotify(keys.spotify);
+    spotify.search({ type: "track", query: spotifyResponse.spotSong },
+      function (err, data) {
+        if (err) {
+          console.log(err)
+        }
+        // console.log(data[1]);
+        setTimeout(function () {
+          doneFunction();
+        }, 1000);
+      })
+  })
+  }
