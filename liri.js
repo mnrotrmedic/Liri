@@ -56,7 +56,7 @@ function doneFunction() {
         mainFunction(); //Calls initial Inquirer questions again
       }
       else {
-        console.log("Have a great day!")
+        console.log("OK, have a great day!")
       }
     });
 };
@@ -134,8 +134,8 @@ function spotifySearch() {
           console.log(">>>>-----------------------------------------------------------------------------------------------------------------")
         }
       })
-      .catch(function (err) {
-        console.log(err);
-      });
+    setTimeout(function () {
+      doneFunction();
+    }, 1000);
   })
 }
