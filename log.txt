@@ -1,0 +1,7 @@
+Liri Log
+------------>
+concert-this: Metallica on: Sunday, February 24, 2019 2:53 PM
+spotify-this-song: enter sandman on: Sunday, February 24, 2019 2:53 PM
+movie-this: Top Gun on: Sunday, February 24, 2019 2:54 PM
+do-what-it-says: "I Want it That Way" on: Sunday, February 24, 2019 2:54 PM
+done looking for now on: Sunday, February 24, 2019 2:54 PM

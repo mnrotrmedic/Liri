@@ -6,6 +6,7 @@ const moment = require("moment");
 var Spotify = require("node-spotify-api");
 const inquirer = require('inquirer');
 const fs = require("fs");
+let randomData;
 
 
 
@@ -33,8 +34,7 @@ function mainFunction() {
         movieRequest();
       }
       else if (choice === "Random Awesomeness") {
-        console.log("You've chosen `Random Awesomeness`")
-        doneFunction();
+        randomness();
       }
     });
 };
@@ -57,6 +57,7 @@ function doneFunction() {
       }
       else {
         console.log("OK, have a great day!")
+        writeStuff("done looking for now");
       }
     });
 };
@@ -69,8 +70,14 @@ function movieRequest() {
       name: "movieInput",
     }
   ]).then(function (movieResponse) {
-    axios.get("http://www.omdbapi.com/?t=" + movieResponse.movieInput + "&y=&plot=short&apikey=trilogy")
+    if (movieResponse.movieInput === "") {
+      var requestMovie = "Mr. Nobody"
+    } else {
+      var requestMovie = movieResponse.movieInput
+    }
+    axios.get("http://www.omdbapi.com/?t=" + requestMovie + "&y=&plot=short&apikey=trilogy")
       .then(function (response) {
+        writeStuff("movie-this: " + requestMovie)
         console.log(">>>>-----------------------------------------------------------------------------------------------------------------");
         console.log("Here's info on " + response.data.Title)
         console.log("Released: " + response.data.Released);
@@ -82,7 +89,6 @@ function movieRequest() {
         console.log("Plot > > > > > > > > > > > > > > > > > > > > >");
         console.log(response.data.Plot);
         console.log(">>>>-----------------------------------------------------------------------------------------------------------------");
-
         setTimeout(function () {
           doneFunction();
         }, 1000);
@@ -100,6 +106,7 @@ function bandsInTown() {
   ]).then(function (bandResponse) {
     axios.get("https://rest.bandsintown.com/artists/" + bandResponse.artist + "/events?app_id=codingbootcamp")
       .then(function (bandResponse) {
+        writeStuff("concert-this: " + bandResponse.data[1].lineup[0]);
         console.log(">>>>-----------------------------------------------------------------------------------------------------------------");
         console.log(bandResponse.data[1].lineup[0] + "'s next concert is at: " + bandResponse.data[1].venue.name);
         console.log("in: " + bandResponse.data[1].venue.city + ", " + bandResponse.data[1].venue.region);
@@ -122,10 +129,16 @@ function spotifySearch() {
       name: "spotSong",
     }
   ]).then(function (spotifyResponse) {
+    if (spotifyResponse.spotSong === "") {
+      var requestSong = "The Sign Ace of Base"
+    } else {
+      var requestSong = spotifyResponse.spotSong
+    }
     var spotify = new Spotify(keys.spotify);
     spotify
-      .search({ type: 'track', query: spotifyResponse.spotSong, limit: 10 })
+      .search({ type: 'track', query: requestSong, limit: 10 })
       .then(function (response) {
+        writeStuff("spotify-this-song: " + requestSong)
         console.log(">>>>-----------------------------------------------------------------------------------------------------------------")
         for (i = 0; i < response.tracks.items.length; i++) {
           console.log('"' + response.tracks.items[i].name + '" by: ' + response.tracks.items[i].artists[0].name);
@@ -138,4 +151,38 @@ function spotifySearch() {
       doneFunction();
     }, 1000);
   })
+}
+
+function randomness() {
+  fs.readFile("random.txt", "utf8", function (error, data) {
+    if (error) {
+      return console.log(error);
+    }
+    randomData = data.split(",")[0];
+    /*console.log(randomData);*/
+    return randomData;
+  })
+  setTimeout(function () {
+    var spotify = new Spotify(keys.spotify);
+    spotify
+      .search({ type: 'track', query: randomData, limit: 10 })
+      .then(function (response) {
+        writeStuff("do-what-it-says: " + randomData)
+        console.log(">>>>-----------------------------------------------------------------------------------------------------------------")
+        for (i = 0; i < response.tracks.items.length; i++) {
+          console.log('"' + response.tracks.items[i].name + '" by: ' + response.tracks.items[i].artists[0].name);
+          console.log("It was released on the album " + '"' + response.tracks.items[i].album.name + '"');
+          console.log("Check it out here: " + response.tracks.items[i].external_urls.spotify);
+          console.log(">>>>-----------------------------------------------------------------------------------------------------------------")
+        }
+      })
+  }, 400);
+  setTimeout(function () {
+    doneFunction();
+  }, 800);
+}
+
+function writeStuff(logEntry){ //get it? Boy band theme...?...
+  fs.appendFile("log.txt",'\n' + logEntry + " on: " + moment().format('LLLL'), function() {
+  });
 }
